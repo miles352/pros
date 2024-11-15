@@ -39,12 +39,6 @@
 #include <unistd.h>
 #endif /* __cplusplus */
 
-#define PROS_VERSION_MAJOR 4
-#define PROS_VERSION_MINOR 1
-#define PROS_VERSION_PATCH 1
-#define PROS_VERSION_STRING "4.1.1"
-
-
 #include "pros/adi.h"
 #include "pros/colors.h"
 #include "pros/device.h"
