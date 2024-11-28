@@ -98,6 +98,27 @@ int32_t controller_get_digital_new_press(controller_id_e_t id, controller_digita
 	}
 }
 
+int32_t controller_get_digital_new_release(controller_id_e_t id, controller_digital_e_t button) {
+	int32_t pressed = controller_get_digital(id, button);
+	uint8_t port;
+	CONTROLLER_PORT_MUTEX_TAKE(id, port)
+	uint8_t button_num = button - E_CONTROLLER_DIGITAL_L1;
+
+	if (pressed) {
+		set_button_pressed(port, button_num, true);
+	}
+	if (!pressed && get_button_pressed(port, button_num)) {
+		// button is currently not pressed and was detected as being pressed during
+		// last check
+		set_button_pressed(port, button_num, false);
+		internal_port_mutex_give(port);
+		return true;
+	} else {
+		internal_port_mutex_give(port);
+		return false; // button is pressed or was already detected
+	}
+}
+
 int32_t controller_set_text(controller_id_e_t id, uint8_t line, uint8_t col, const char* str) {
 	uint8_t port;
 	CONTROLLER_PORT_MUTEX_TAKE(id, port)
