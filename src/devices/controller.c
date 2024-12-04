@@ -23,8 +23,10 @@
 // From enum in misc.h
 #define NUM_BUTTONS 12
 
+// button_pressed is used for get_digital_new_press and button_released is used for get_digital_new_release
 typedef struct controller_data {
 	bool button_pressed[NUM_BUTTONS];
+	bool button_released[NUM_BUTTONS];
 } controller_data_s_t;
 
 bool get_button_pressed(int port, int button) {
@@ -34,6 +36,15 @@ bool get_button_pressed(int port, int button) {
 void set_button_pressed(int port, int button, bool state) {
 	controller_data_s_t* data = (controller_data_s_t*)registry_get_device_internal(port)->pad;
 	data->button_pressed[button] = state;
+}
+
+bool get_button_released(int port, int button) {
+	return ((controller_data_s_t*)registry_get_device_internal(port)->pad)->button_released[button];
+}
+
+void set_button_released(int port, int button, bool state) {
+	controller_data_s_t* data = (controller_data_s_t*)registry_get_device_internal(port)->pad;
+	data->button_released[button] = state;
 }
 
 int32_t controller_is_connected(controller_id_e_t id) {
@@ -105,12 +116,12 @@ int32_t controller_get_digital_new_release(controller_id_e_t id, controller_digi
 	uint8_t button_num = button - E_CONTROLLER_DIGITAL_L1;
 
 	if (pressed) {
-		set_button_pressed(port, button_num, true);
+		set_button_released(port, button_num, false);
 	}
-	if (!pressed && get_button_pressed(port, button_num)) {
+	if (!pressed && !get_button_released(port, button_num)) {
 		// button is currently not pressed and was detected as being pressed during
 		// last check
-		set_button_pressed(port, button_num, false);
+		set_button_released(port, button_num, true);
 		internal_port_mutex_give(port);
 		return true;
 	} else {
